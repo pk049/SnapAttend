@@ -1,4 +1,4 @@
-# eduvision
+# SnapAttend
 
 Smart attendance APP.
 
