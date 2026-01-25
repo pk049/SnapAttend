@@ -4,6 +4,22 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:eduvision/utils/device_utils.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'dart:io';
+
+Future<void> requestManageStoragePermission() async {
+  if (Platform.isAndroid && await Permission.manageExternalStorage.isDenied) {
+    var status = await Permission.manageExternalStorage.request();
+    if (status.isGranted) {
+      print("Permission granted");
+    } else {
+      print("Permission denied");
+      openAppSettings(); // Optional fallback
+    }
+  }
+}
+
 
 
 //STATEFUL
@@ -20,6 +36,12 @@ class _LoginpageState extends State<Loginpage> {
   // Loading state
   bool _isLoading = false;
 
+  @override
+  void initState() {
+    super.initState();
+    requestManageStoragePermission();  // Ask for permission when login screen loads
+  }
+
   Future<void> login() async {
     // Set loading state
     setState(() {
@@ -33,12 +55,16 @@ class _LoginpageState extends State<Loginpage> {
         'password': _passwordController.text,
       };
 
-      // Make the POST request
+      final baseUrl = await DeviceUtils.getBaseUrl();
+
+
+// Make the POST request
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:5000/login'),
+        Uri.parse('$baseUrl/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(requestData),
       );
+
 
       // Parse the response
       final responseData = jsonDecode(response.body);
@@ -50,12 +76,13 @@ class _LoginpageState extends State<Loginpage> {
       if (responseData['status'] == 'success') {
         final String department = responseData['department'] ?? 'Unknown Department';
         final String name = responseData['name'] ?? 'Unknown Professor';
+        final String email = responseData['email'] ?? 'Unknown Email'; // ✅ Extract email
 
         // Navigate to home page on success
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => MyHomePage(title: "Eduvision", professorName: name,
-            department: department,)),
+            department: department,email: email, )),
         );
       } else {
         // Show error toast

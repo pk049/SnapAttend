@@ -4,12 +4,14 @@ import 'dart:io';
 import 'package:eduvision/Attendance_view.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:eduvision/utils/device_utils.dart';
 
 class CapturePage extends StatefulWidget {
   final String? department;
+  final String? professorName;
 
   // Update constructor to accept department parameter
-  const CapturePage({Key? key, this.department}) : super(key: key);
+  const CapturePage({Key? key, this.department, this.professorName}) : super(key: key);
 
   @override
   _CapturePageState createState() => _CapturePageState();
@@ -204,9 +206,13 @@ class _CapturePageState extends State<CapturePage> {
       // Construct the class_department string as requested
       String classDepartment = "${classValue}_${widget.department}";
 
+      final baseUrl = await DeviceUtils.getBaseUrl();
+
       // Make POST request to the API
       final response = await http.post(
-        Uri.parse('http://192.168.226.136:5000/get_subjects'),
+
+        Uri.parse('$baseUrl/get_subjects'),
+
         headers: {
           'Content-Type': 'application/json',
         },
@@ -283,6 +289,9 @@ class _CapturePageState extends State<CapturePage> {
               time: currentTime,
               imagePath: photo.path,
               department: widget.department ?? 'None', // Pass department to AttendanceView
+              professorName: widget.professorName ?? 'None', // Pass professor name here
+
+
             ),
           ),
         );

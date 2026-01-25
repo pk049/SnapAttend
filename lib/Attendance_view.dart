@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
+import 'package:eduvision/utils/device_utils.dart';
+
 
 // Modify the constructor in AttendanceView to accept department parameter
 class AttendanceView extends StatefulWidget {
@@ -11,6 +13,7 @@ class AttendanceView extends StatefulWidget {
   final String time;
   final String imagePath;
   final String department; // Add department parameter
+  final String professorName;
 
   const AttendanceView({
     Key? key,
@@ -20,6 +23,7 @@ class AttendanceView extends StatefulWidget {
     required this.time,
     required this.imagePath,
     required this.department, // Add this parameter
+    required this.professorName, // Add this
   }) : super(key: key);
 
   @override
@@ -177,7 +181,8 @@ class _AttendanceViewState extends State<AttendanceView> {
     });
 
     try {
-      final Uri uri = Uri.parse('http://10.0.2.2:3000/detect_faces');
+
+      final Uri uri = Uri.parse('http://192.168.29.102:3000/detect_faces');
       final request = http.MultipartRequest('POST', uri);
 
       // Add text fields
@@ -187,6 +192,9 @@ class _AttendanceViewState extends State<AttendanceView> {
 
       // Add the department field if you want to include it
       request.fields['department'] = widget.department;
+      request.fields['faculty_name'] = widget.professorName;
+      print("Professor Name: ${widget.professorName}");
+
 
       // Add the image file
       final imageFile = File(currentImagePath);
